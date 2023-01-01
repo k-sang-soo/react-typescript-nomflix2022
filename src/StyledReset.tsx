@@ -39,6 +39,7 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
+    height: 200vh;
   }
 
   [hidden], hr {
