@@ -18,7 +18,7 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     -o-box-sizing: border-box;
-    color: black;
+    color: ${(props) => props.theme.white.darker};
   }
 
   :before, :after {
@@ -39,7 +39,7 @@ export const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
-    height: 200vh;
+    background-color: #000;
   }
 
   [hidden], hr {
@@ -106,7 +106,8 @@ export const GlobalStyle = createGlobalStyle`
     -webkit-transition: background-color 5000s;
     transition: background-color 5000s;
     -webkit-text-fill-color: #fff !important;
-    border: 0;
+    border: 0;import { theme } from './theme';
+
   }
 
   textarea {

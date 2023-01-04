@@ -6,6 +6,7 @@ import App from './App';
 import { GlobalStyle } from './StyledReset';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { theme } from './theme';
+import { UiStyle } from './Ui';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 
@@ -17,6 +18,7 @@ root.render(
             <QueryClientProvider client={client}>
                 <ThemeProvider theme={theme}>
                     <GlobalStyle />
+                    <UiStyle />
                     <App />
                 </ThemeProvider>
             </QueryClientProvider>
