@@ -53,11 +53,16 @@ const Row = styled(motion.div)`
     width: 100%;
 `;
 
-const Box = styled(motion.div)`
-    background-color: #fff;
-    height: 200px;
+const Box = styled(motion.div)<{ $bgPhoto: string }>`
+    height: 0;
+    padding-bottom: 56.2%;
     color: red;
-    font-size: 66px;
+    font-size: 24px;
+    background-color: #fff;
+    background-image: url(${(props) => props.$bgPhoto});
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
 `;
 
 console.log('Box', Row);
@@ -74,10 +79,22 @@ const rowVariants = {
     },
 };
 
+const offset = 6;
+
 function Home() {
     const { data, isLoading } = useQuery<IGetMoviesResult>(['movies', 'nowPlaying'], getMovies);
     const [index, setIndex] = useState(0);
-    const increaseIndex = () => setIndex((prev) => prev + 1);
+    const [leaving, setLeaving] = useState(false);
+    const increaseIndex = () => {
+        if (data) {
+            if (leaving) return;
+            setLeaving(true);
+            const totalMoviesLength = data.results.length - 1;
+            const maxIndex = Math.floor(totalMoviesLength / offset) - 1;
+            setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+        }
+    };
+    const toggleLeaving = () => setLeaving(false);
     console.log(isLoading);
     console.log(data);
 
@@ -93,11 +110,16 @@ function Home() {
                     </Banner>
                     <Slider>
                         {/* AnimatePresence 는 컴포넌트가 렌더링 되거나 없어질 때 효과를 줌*/}
-                        <AnimatePresence>
+                        {/* onExitComplete 애니메이션이 끝난 후 함수 호출 */}
+                        {/* initial 초기 화면이 애니메이션 값이 들어온 후로 보여지게 만들어 줌 */}
+                        <AnimatePresence initial={false} onExitComplete={toggleLeaving}>
                             <Row variants={rowVariants} initial="hidden" animate="visible" exit="exit" transition={{ type: 'tween', duration: 1 }} key={index}>
-                                {[1, 2, 3, 4, 5, 6].map((i) => (
-                                    <Box key={i}>{i}</Box>
-                                ))}
+                                {data?.results
+                                    .slice(1)
+                                    .slice(offset * index, offset * index + offset)
+                                    .map((movie) => (
+                                        <Box key={movie.id} $bgPhoto={makeImagePath(movie.backdrop_path, 'w500')}></Box>
+                                    ))}
                             </Row>
                         </AnimatePresence>
                     </Slider>
