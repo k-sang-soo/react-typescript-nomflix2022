@@ -1,6 +1,10 @@
 import { createGlobalStyle } from 'styled-components';
 
 export const UiStyle = createGlobalStyle`
+    .isFixedScroll {
+        overflow: hidden;
+    }
+
     #root {
         overflow: hidden;
     }

@@ -87,6 +87,52 @@ const Info = styled(motion.div)`
     }
 `;
 
+const MoviePopupWrap = styled(motion.div)`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    opacity: 0;
+    overflow-y: auto;
+`;
+
+const MoviePopupArea = styled(motion.div)`
+    position: absolute;
+    width: 60vw;
+    background-color: ${(props) => props.theme.black.lighter};
+    top: 10px;
+    left: 0;
+    right: 0;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0 auto;
+`;
+
+const MoviePopupImg = styled.figure`
+    height: 0;
+    padding-bottom: 56.2%;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+`;
+
+const MoviePopupInner = styled.div`
+    padding: 20px;
+`;
+
+const MoviePopupTtl = styled.h2`
+    color: ${(props) => props.theme.white.lighter};
+    text-align: center;
+    font-size: 28px;
+`;
+
+const MoviePopupOverView = styled.p`
+    padding: 20px;
+    color: ${(props) => props.theme.white.lighter};
+`;
+
 const boxVariants = {
     normal: {
         scale: 1,
@@ -114,12 +160,8 @@ const infoVariants = {
 };
 
 function Home() {
-    //고쳐야될 버그 : resize 후 슬라이드 시 width 가 달라지면서 넘길 때 오류가 생김
-    // increaseIndex 함수에서 seIndex가 실행되기 때문인지 확인 필요
     const navigate = useNavigate();
     const moviePopupMatch = useMatch('/movies/:movieId');
-    console.log('moviePopupMatch', moviePopupMatch);
-
     const [slideGrid, setSlideGrid] = useState(0);
     const { data, isLoading } = useQuery<IGetMoviesResult>(['movies', 'nowPlaying'], getMovies);
     const [winW, setWinW] = useState(window.innerWidth);
@@ -141,6 +183,14 @@ function Home() {
         console.log(movieId);
         navigate(`/movies/${movieId}`);
     };
+    const onBoxHideClicked = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.currentTarget === e.target) {
+            navigate('/');
+        }
+    };
+
+    const clickedMovie = moviePopupMatch?.params.movieId && data?.results.find((movie) => String(movie.id) === moviePopupMatch.params.movieId);
+    console.log('clickedMovie', clickedMovie);
 
     const handleResize = () => {
         setWinW(window.innerWidth);
@@ -169,14 +219,17 @@ function Home() {
     };
 
     useEffect(() => {
+        console.log('useEffect');
+
         changeSlideGrid();
         increaseIndex();
 
         window.addEventListener('resize', handleResize);
+        moviePopupMatch ? document.body.classList.add('isFixedScroll') : document.body.classList.remove('isFixedScroll');
         return () => {
             window.addEventListener('resize', handleResize);
         };
-    }, [winW]);
+    }, [winW, moviePopupMatch]);
 
     return (
         <Wrapper className="root_section">
@@ -199,6 +252,8 @@ function Home() {
                                     .slice(slideGrid * index, slideGrid * index + slideGrid)
                                     .map((movie) => (
                                         <Box
+                                            // layoutId 는 string 여야 함
+                                            layoutId={movie.id + ''}
                                             onClick={() => onBoxClicked(movie.id)}
                                             variants={boxVariants}
                                             initial="normal"
@@ -215,6 +270,28 @@ function Home() {
                             </Row>
                         </AnimatePresence>
                     </Slider>
+                    <AnimatePresence>
+                        {moviePopupMatch && (
+                            <MoviePopupWrap onClick={onBoxHideClicked} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                <MoviePopupArea layoutId={moviePopupMatch.params.movieId}>
+                                    {clickedMovie && (
+                                        <>
+                                            <MoviePopupImg
+                                                style={{
+                                                    backgroundImage: `linear-gradient(to top, black, transparent), url(${makeImagePath(clickedMovie.backdrop_path, 'w500')})`,
+                                                }}
+                                            />
+                                            <MoviePopupInner>
+                                                <MoviePopupTtl>{clickedMovie.title}</MoviePopupTtl>
+                                                <MoviePopupOverView>{clickedMovie.overview}</MoviePopupOverView>
+                                            </MoviePopupInner>
+                                        </>
+                                    )}
+                                </MoviePopupArea>
+                            </MoviePopupWrap>
+                        )}
+                    </AnimatePresence>
+                    <div style={{ height: '100vh' }}></div>
                 </>
             )}
         </Wrapper>
