@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import { motion, useAnimation, useScroll, useViewportScroll } from 'framer-motion';
-import { Link, useMatch } from 'react-router-dom';
+import { Link, useMatch, useNavigate } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const Nav = styled(motion.nav)`
     display: flex;
@@ -49,7 +50,7 @@ const Item = styled.li`
     }
 `;
 
-const Search = styled.span`
+const Search = styled.form`
     color: white;
     display: flex;
     align-items: center;
@@ -106,10 +107,15 @@ const navVariants = {
     },
 };
 
+interface IForm {
+    keyword: string;
+}
+
 function Header() {
     const [searchOpen, setSearchOpen] = useState(false);
     const homeMatch = useMatch('/');
     const tvMatch = useMatch('tv');
+    const navigate = useNavigate();
     const navAnimation = useAnimation();
     const inputAnimation = useAnimation();
     const { scrollY } = useScroll();
@@ -139,6 +145,18 @@ function Header() {
             }
         });
     }, [scrollY]);
+    const { register, handleSubmit, setValue } = useForm<IForm>();
+    const onValid = (data: IForm) => {
+        console.log('tvMatch', tvMatch);
+        let type;
+        if (homeMatch) {
+            type = 'movie';
+        } else if (tvMatch) {
+            type = 'tv';
+        }
+        setValue('keyword', '');
+        navigate(`/search?keyword=${data.keyword}&type=${type}`);
+    };
     return (
         <Nav ref={nav} variants={navVariants} animate={navAnimation} initial="top">
             <Col>
@@ -155,7 +173,7 @@ function Header() {
                 </Items>
             </Col>
             <Col>
-                <Search>
+                <Search onSubmit={handleSubmit(onValid)}>
                     <motion.svg
                         onClick={toggleSearch}
                         animate={{ x: searchOpen ? -200 : 0 }}
@@ -166,7 +184,13 @@ function Header() {
                     >
                         <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path>
                     </motion.svg>
-                    <Input transition={{ ease: 'linear' }} animate={inputAnimation} initial={{ scaleX: 0 }} placeholder="Search for movie or tv show..." />
+                    <Input
+                        {...register('keyword', { required: true, minLength: 2 })}
+                        transition={{ ease: 'linear' }}
+                        animate={inputAnimation}
+                        initial={{ scaleX: 0 }}
+                        placeholder="Search for movie or tv show..."
+                    />
                 </Search>
             </Col>
         </Nav>

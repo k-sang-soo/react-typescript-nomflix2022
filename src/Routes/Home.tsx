@@ -164,6 +164,8 @@ function Home() {
     const moviePopupMatch = useMatch('/movies/:movieId');
     const [slideGrid, setSlideGrid] = useState(0);
     const { data, isLoading } = useQuery<IGetMoviesResult>(['movies', 'nowPlaying'], getMovies);
+    console.log('data', data);
+
     const [winW, setWinW] = useState(window.innerWidth);
     const [index, setIndex] = useState(0);
     const [leaving, setLeaving] = useState(false);
@@ -173,14 +175,12 @@ function Home() {
             setLeaving(true);
             const totalMoviesLength = data.results.length - 1;
             const maxIndex = Math.floor(totalMoviesLength / slideGrid) - 1;
-            console.log('maxIndex', maxIndex);
 
             setIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
         }
     };
     const toggleLeaving = () => setLeaving(false);
     const onBoxClicked = (movieId: number) => {
-        console.log(movieId);
         navigate(`/movies/${movieId}`);
     };
     const onBoxHideClicked = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -190,7 +190,6 @@ function Home() {
     };
 
     const clickedMovie = moviePopupMatch?.params.movieId && data?.results.find((movie) => String(movie.id) === moviePopupMatch.params.movieId);
-    console.log('clickedMovie', clickedMovie);
 
     const handleResize = () => {
         setWinW(window.innerWidth);
@@ -219,8 +218,6 @@ function Home() {
     };
 
     useEffect(() => {
-        console.log('useEffect');
-
         changeSlideGrid();
         increaseIndex();
 

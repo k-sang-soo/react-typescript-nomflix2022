@@ -20,6 +20,22 @@ export interface IGetMoviesResult {
     total_results: number;
 }
 
+export interface ISearchMovie {
+    id: number;
+    title: string;
+    overview: string;
+    release_date: string;
+    vote_average: number;
+}
+
+export interface IGetSearchMovieResult {
+    results: ISearchMovie[];
+}
+
 export function getMovies() {
     return fetch(`${BASE_PATH}/movie/now_playing?api_key=${API_KEY}`).then((response) => response.json());
+}
+
+export function getSearch(type: string, keyword: string) {
+    return fetch(`${BASE_PATH}/search/${type}?api_key=${API_KEY}&query=${keyword}`).then((response) => response.json());
 }
